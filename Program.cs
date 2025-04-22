@@ -67,7 +67,30 @@ namespace IngameScript
             // 
             // The method itself is required, but the arguments above
             // can be removed if not needed.
-            
         }
+        
+        public void SetupDrawSurface(IMyTextSurface surface)
+        {
+            // Draw background color
+            surface.ScriptBackgroundColor = new Color(0, 0, 0, 255);
+
+            // Set content type
+            surface.ContentType = ContentType.SCRIPT;
+
+            // Set script to none
+            surface.Script = "";
+        }
+
+        public void DrawSprites(MySpriteDrawFrame frame, Vector2 centerPos, float scale = 1f, float rotation = 0f, float colorScale = 1f)
+        {
+            float sin = (float)Math.Sin(rotation);
+            float cos = (float)Math.Cos(rotation);
+            frame.Add(new MySprite(SpriteType.TEXTURE, "SquareSimple", new Vector2(cos*-48f,sin*-48f)*scale+centerPos, new Vector2(75f,100f)*scale, new Color(1f*colorScale,1f*colorScale,1f*colorScale,1f), null, TextAlignment.CENTER, rotation)); // ConnectorBody
+            frame.Add(new MySprite(SpriteType.TEXTURE, "SquareSimple", new Vector2(0f,0f)*scale+centerPos, new Vector2(50f,75f)*scale, new Color(1f*colorScale,1f*colorScale,1f*colorScale,1f), null, TextAlignment.CENTER, rotation)); // ConnectorBodyExtension
+            frame.Add(new MySprite(SpriteType.TEXTURE, "RightTriangle", new Vector2(cos*12f-sin*-43f,sin*12f+cos*-43f)*scale+centerPos, new Vector2(25f,12f)*scale, new Color(1f*colorScale,1f*colorScale,1f*colorScale,1f), null, TextAlignment.CENTER, rotation)); // Connector ConnectUp
+            frame.Add(new MySprite(SpriteType.TEXTURE, "RightTriangle", new Vector2(cos*12f-sin*44f,sin*12f+cos*44f)*scale+centerPos, new Vector2(12f,25f)*scale, new Color(1f*colorScale,1f*colorScale,1f*colorScale,1f), null, TextAlignment.CENTER, 1.5708f+rotation)); // Connector ConnectDown
+            frame.Add(new MySprite(SpriteType.TEXTURE, "SquareSimple", new Vector2(cos*32f,sin*32f)*scale+centerPos, new Vector2(5f,75f)*scale, new Color(1f*colorScale,1f*colorScale,1f*colorScale,1f), null, TextAlignment.CENTER, rotation)); // Ring
+        }
+
     }
 }
