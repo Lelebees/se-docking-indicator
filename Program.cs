@@ -72,7 +72,7 @@ namespace IngameScript
         {
             List<IMyTerminalBlock> outputBlocks = new List<IMyTerminalBlock>();
             GridTerminalSystem.GetBlocksOfType<IMyTerminalBlock>(outputBlocks,
-                block => MyIni.HasSection(block.CustomData, SectionIdentifier) && block.IsSameConstructAs(Me));
+                block => MyIni.HasSection(block.CustomData, IndicatorSectionIdentifier) && block.IsSameConstructAs(Me));
             MyIni blockConfigParser = new MyIni();
             foreach (IMyTerminalBlock block in outputBlocks)
             {
@@ -81,7 +81,7 @@ namespace IngameScript
                 {
                     throw new Exception(configParseResult.ToString());
                 }
-                
+
                 IMyTextSurface outputSurface;
                 IMyTextSurface surface = block as IMyTextSurface;
                 if (surface != null)
@@ -90,7 +90,6 @@ namespace IngameScript
                 }
                 else if (block is IMyTextSurfaceProvider)
                 {
-
                     int surfaceNumber = blockConfigParser.Get(IndicatorSectionIdentifier, "screen number")
                         .ToInt32();
                     outputSurface = ((IMyTextSurfaceProvider)block).GetSurface(surfaceNumber);
@@ -100,11 +99,29 @@ namespace IngameScript
                     continue;
                 }
 
-                string connectedDock = blockConfigParser.Get(IndicatorSectionIdentifier, "connected port").ToString("");
+                string connectedDock = null;
+                blockConfigParser.Get(IndicatorSectionIdentifier, "connected port").TryGetString(out connectedDock);
+                if (connectedDock == null)
+                {
+                    Echo("connected port property not found!");
+                }
+
                 Indicator indicator = new Indicator(outputSurface, connectedDock);
-                indicatorPanels.Add(indicator);
                 DockingPort dock = ports.Find(port => port.getName() == connectedDock);
+                Echo("Dock name: " + connectedDock);
+                if (dock == null)
+                {
+                    Echo($"Dock {connectedDock} not found for Indicator {block.CustomName}");
+                    continue;
+                }
+
+                indicatorPanels.Add(indicator);
                 dock.OnDockingPortStatusChange += indicator.UpdateDockingPortIndication;
+            }
+
+            foreach (DockingPort port in ports)
+            {
+                port.UpdateState();
             }
         }
 
@@ -117,7 +134,14 @@ namespace IngameScript
                 {
                     port.UpdateState();
                 }
+
                 timeSinceLastUpdate = TimeSpan.Zero;
+            }
+
+            foreach (Indicator panel in indicatorPanels)
+            {
+                DockingPort dock = ports.Find(port => port.getName() == panel.trackedPort);
+                panel.UpdateDockingPortIndication(dock, new DockingPortStatusChangeEventArguments());
             }
         }
     }

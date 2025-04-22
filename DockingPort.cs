@@ -41,7 +41,7 @@ namespace IngameScript
 
         public string getName()
         {
-            return connector.CustomName;
+            return dockName;
         }
 
         public DockingPortState getState()

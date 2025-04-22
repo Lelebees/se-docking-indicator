@@ -10,7 +10,7 @@ namespace IngameScript
     public class Indicator
     {
         private readonly IMyTextSurface textSurface;
-        private readonly string trackedPort;
+        public readonly string trackedPort;
         private static readonly Color ConnectedGreen = new Color(0, 255, 0); // Nuclear Green
         private static readonly Color DisconnectingBlue = new Color(0, 255, 255); // Cyan
         private static readonly Color ConnectingYellow = new Color(255, 255, 0); // Uranium Yellow
@@ -28,21 +28,26 @@ namespace IngameScript
         public void UpdateDockingPortIndication(DockingPort port, DockingPortStatusChangeEventArguments arguments)
         {
             MySpriteDrawFrame frame = textSurface.DrawFrame();
+            RectangleF viewport = new RectangleF(
+                (textSurface.TextureSize - textSurface.SurfaceSize) / 2f,
+                textSurface.SurfaceSize
+            );
             switch (port.getState())
             {
                 case DockingPortState.Disconnected:
-                    RenderDisconnected(frame, new Vector2(), port);
+                    RenderDisconnected(frame, viewport.Center, port);
                     break;
                 case DockingPortState.Docked:
-                    RenderDocked(frame, new Vector2(), port);
+                    RenderDocked(frame, viewport.Center, port);
                     break;
                 case DockingPortState.Docking:
-                    RenderDocking(frame, new Vector2(), port);
+                    RenderDocking(frame, viewport.Center, port);
                     break;
                 case DockingPortState.Undocking:
-                    RenderUndocking(frame, new Vector2(), port);
+                    RenderUndocking(frame, viewport.Center, port);
                     break;
             }
+            frame.Dispose();
         }
 
         private void RenderDisconnected(MySpriteDrawFrame frame, Vector2 centerPos, DockingPort dockingPort,
