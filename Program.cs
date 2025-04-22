@@ -116,7 +116,7 @@ namespace IngameScript
                     Position = new Vector2(0f, -180f) * scale + centerPos,
                     Color = color,
                     FontId = "Debug",
-                    RotationOrScale = 3.5f * scale
+                    RotationOrScale = 3.2f * scale
                 }, // labelPortName
                 new MySprite()
                 {
