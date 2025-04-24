@@ -35,50 +35,53 @@ namespace IngameScript
             switch (port.GetState())
             {
                 case DockingPortState.Disconnected:
-                    RenderDisconnected(frame, viewport.Center, port);
+                    RenderDisconnected(frame, viewport.Center);
                     break;
                 case DockingPortState.Docked:
-                    RenderDocked(frame, viewport.Center, port);
+                    RenderDocked(frame, viewport.Center);
                     break;
                 case DockingPortState.Docking:
-                    RenderDocking(frame, viewport.Center, port);
+                    RenderDocking(frame, viewport.Center);
                     break;
                 case DockingPortState.Undocking:
-                    RenderUndocking(frame, viewport.Center, port);
+                    RenderUndocking(frame, viewport.Center);
                     break;
             }
+
             frame.Dispose();
         }
 
-        private void RenderDisconnected(MySpriteDrawFrame frame, Vector2 centerPos, DockingPort dockingPort,
-            float scale = 1f)
+        private void RenderDisconnected(MySpriteDrawFrame frame, Vector2 centerPos, float scale = 1f)
         {
-            frame.AddRange(DrawDockingPortName(centerPos, scale, textSurface.ScriptForegroundColor, dockingPort));
-            frame.AddRange(DrawLeftConnector(centerPos, scale, Color.White));
+            Color leftPortColor = Color.White;
+            if (port.isDamagedOrDisabled())
+            {
+                leftPortColor = ErrorRed;
+            }
+            frame.AddRange(DrawDockingPortName(centerPos, scale, textSurface.ScriptForegroundColor, port));
+            frame.AddRange(DrawLeftConnector(centerPos, scale, leftPortColor));
         }
 
-        private void RenderDocked(MySpriteDrawFrame frame, Vector2 centerPos, DockingPort dockingPort, float scale = 1f)
+        private void RenderDocked(MySpriteDrawFrame frame, Vector2 centerPos, float scale = 1f)
         {
-            frame.AddRange(DrawDockingPortName(centerPos, scale, textSurface.ScriptForegroundColor, dockingPort));
+            frame.AddRange(DrawDockingPortName(centerPos, scale, textSurface.ScriptForegroundColor, port));
             frame.AddRange(DrawLeftConnector(centerPos, scale, ConnectedGreen));
             frame.AddRange(DrawConnectionChain(centerPos, scale));
             frame.AddRange(DrawRightConnector(centerPos, scale, ConnectedGreen));
-            frame.AddRange(DrawDockeeAnnouncement(centerPos, scale, textSurface.ScriptForegroundColor, dockingPort));
+            frame.AddRange(DrawDockeeAnnouncement(centerPos, scale, textSurface.ScriptForegroundColor, port));
         }
 
-        private void RenderDocking(MySpriteDrawFrame frame, Vector2 centerPos, DockingPort dockingPort,
-            float scale = 1f)
+        private void RenderDocking(MySpriteDrawFrame frame, Vector2 centerPos, float scale = 1f)
         {
-            frame.AddRange(DrawDockingPortName(centerPos, scale, textSurface.ScriptForegroundColor, dockingPort));
+            frame.AddRange(DrawDockingPortName(centerPos, scale, textSurface.ScriptForegroundColor, port));
             frame.AddRange(DrawLeftConnector(centerPos, scale, ConnectingYellow));
             frame.AddRange(DrawDockingArrows(centerPos, scale));
             frame.AddRange(DrawRightConnector(centerPos, scale, ConnectingYellow));
         }
 
-        private void RenderUndocking(MySpriteDrawFrame frame, Vector2 centerPos, DockingPort dockingPort,
-            float scale = 1f)
+        private void RenderUndocking(MySpriteDrawFrame frame, Vector2 centerPos, float scale = 1f)
         {
-            frame.AddRange(DrawDockingPortName(centerPos, scale, textSurface.ScriptForegroundColor, dockingPort));
+            frame.AddRange(DrawDockingPortName(centerPos, scale, textSurface.ScriptForegroundColor, port));
             frame.AddRange(DrawLeftConnector(centerPos, scale, DisconnectingBlue));
             frame.AddRange(DrawUndockArrows(centerPos, scale));
             frame.AddRange(DrawRightConnector(centerPos, scale, DisconnectingBlue));
@@ -115,7 +118,8 @@ namespace IngameScript
             return textureSprites;
         }
 
-        private static List<MySprite> DrawDockeeAnnouncement(Vector2 centerPos, float scale, Color color, DockingPort port)
+        private static List<MySprite> DrawDockeeAnnouncement(Vector2 centerPos, float scale, Color color,
+            DockingPort port)
         {
             List<MySprite> textureSprites = new List<MySprite>
             {
