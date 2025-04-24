@@ -27,9 +27,8 @@ namespace IngameScript
         private const string IndicatorSectionIdentifier = "PortIndicator";
         private const string DockingPortSectionIdentifier = "DockingPort";
         private readonly MyIni configDataParser = new MyIni();
-        private readonly List<DockingPort> ports = new List<DockingPort>();
+        private readonly Dictionary<string, DockingPort> ports = new Dictionary<string, DockingPort>();
         private readonly List<Indicator> indicatorPanels = new List<Indicator>();
-        private TimeSpan timeSinceLastUpdate = TimeSpan.Zero;
 
 
         public Program()
@@ -48,7 +47,7 @@ namespace IngameScript
             InitializeDockingPorts();
             InitializePortIndicators();
 
-            Runtime.UpdateFrequency = UpdateFrequency.Update1;
+            Runtime.UpdateFrequency = UpdateFrequency.Update10;
         }
 
         public static string GetDockingPortSectionIdentifier()
@@ -64,7 +63,8 @@ namespace IngameScript
                              connector.IsSameConstructAs(Me));
             foreach (IMyShipConnector connector in configuredConnectors)
             {
-                ports.Add(new DockingPort(connector));
+                DockingPort port = new DockingPort(connector);
+                ports.Add(port.GetName(), port);
             }
         }
 
@@ -104,44 +104,24 @@ namespace IngameScript
                 if (connectedDock == null)
                 {
                     Echo("connected port property not found!");
+                    continue;
                 }
 
-                Indicator indicator = new Indicator(outputSurface, connectedDock);
-                DockingPort dock = ports.Find(port => port.getName() == connectedDock);
-                Echo("Dock name: " + connectedDock);
+                DockingPort dock = ports[connectedDock];
                 if (dock == null)
                 {
                     Echo($"Dock {connectedDock} not found for Indicator {block.CustomName}");
                     continue;
                 }
-
-                indicatorPanels.Add(indicator);
-                dock.OnDockingPortStatusChange += indicator.UpdateDockingPortIndication;
-            }
-
-            foreach (DockingPort port in ports)
-            {
-                port.UpdateState();
+                indicatorPanels.Add(new Indicator(outputSurface, dock));
             }
         }
 
         public void Main(string argument, UpdateType updateSource)
         {
-            timeSinceLastUpdate = timeSinceLastUpdate.Add(Runtime.TimeSinceLastRun);
-            if (timeSinceLastUpdate.Milliseconds >= 50)
-            {
-                foreach (DockingPort port in ports)
-                {
-                    port.UpdateState();
-                }
-
-                timeSinceLastUpdate = TimeSpan.Zero;
-            }
-
             foreach (Indicator panel in indicatorPanels)
             {
-                DockingPort dock = ports.Find(port => port.getName() == panel.trackedPort);
-                panel.UpdateDockingPortIndication(dock, new DockingPortStatusChangeEventArguments());
+                panel.UpdateDockingPortIndication();
             }
         }
     }

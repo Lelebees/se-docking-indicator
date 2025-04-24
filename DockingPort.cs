@@ -5,32 +5,24 @@ using VRage.Game.ModAPI.Ingame.Utilities;
 
 namespace IngameScript
 {
-    public delegate void DockingPortStatusChangeEventHandler(DockingPort source, DockingPortStatusChangeEventArguments eventArguments);
-
-    public class DockingPortStatusChangeEventArguments : EventArgs
-    {
-        
-    }
-        
     public class DockingPort
     {
         private readonly IMyShipConnector connector;
-        private string dockName;
-        private DockingPortState state;
-        public event DockingPortStatusChangeEventHandler OnDockingPortStatusChange;
-        
+        private readonly string dockName;
+
 
         public DockingPort(IMyShipConnector connector)
         {
             this.connector = connector;
-            this.state = ConvertConnectorStatusToState(connector.Status);
             MyIni customData = new MyIni();
             if (!customData.TryParse(this.connector.CustomData))
             {
                 dockName = this.connector.CustomName;
                 return;
             }
-            dockName = customData.Get(Program.GetDockingPortSectionIdentifier(), "port name").ToString(this.connector.CustomName);
+
+            dockName = customData.Get(Program.GetDockingPortSectionIdentifier(), "port name")
+                .ToString(this.connector.CustomName);
         }
 
         public bool isDamagedOrDisabled()
@@ -39,26 +31,14 @@ namespace IngameScript
             return connector.IsWorking;
         }
 
-        public string getName()
+        public string GetName()
         {
             return dockName;
         }
 
-        public DockingPortState getState()
+        public DockingPortState GetState()
         {
-            return this.state;
-        }
-
-        public void UpdateState()
-        {
-            DockingPortState newState = ConvertConnectorStatusToState(connector.Status);
-            if (state == newState)
-            {
-                return;
-            }
-
-            state = newState;
-            OnDockingPortStatusChange?.Invoke(this, new DockingPortStatusChangeEventArguments());
+            return ConvertConnectorStatusToState(connector.Status);
         }
 
         private static DockingPortState ConvertConnectorStatusToState(MyShipConnectorStatus status)
