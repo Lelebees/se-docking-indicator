@@ -10,29 +10,29 @@ namespace IngameScript
     public class Indicator
     {
         private readonly IMyTextSurface textSurface;
-        public readonly string trackedPort;
+        private readonly DockingPort port;
         private static readonly Color ConnectedGreen = new Color(0, 255, 0); // Nuclear Green
         private static readonly Color DisconnectingBlue = new Color(0, 255, 255); // Cyan
         private static readonly Color ConnectingYellow = new Color(255, 255, 0); // Uranium Yellow
         private static readonly Color ErrorRed = Color.Red; // It does not get redder then this.
 
-        public Indicator(IMyTextSurface textSurface, string trackedPort)
+        public Indicator(IMyTextSurface textSurface, DockingPort port)
         {
             this.textSurface = textSurface;
-            this.trackedPort = trackedPort;
+            this.port = port;
             textSurface.ScriptBackgroundColor = new Color(0, 0, 0, 255);
             textSurface.ContentType = ContentType.SCRIPT;
             textSurface.Script = "";
         }
 
-        public void UpdateDockingPortIndication(DockingPort port, DockingPortStatusChangeEventArguments arguments)
+        public void UpdateDockingPortIndication()
         {
             MySpriteDrawFrame frame = textSurface.DrawFrame();
             RectangleF viewport = new RectangleF(
                 (textSurface.TextureSize - textSurface.SurfaceSize) / 2f,
                 textSurface.SurfaceSize
             );
-            switch (port.getState())
+            switch (port.GetState())
             {
                 case DockingPortState.Disconnected:
                     RenderDisconnected(frame, viewport.Center, port);
@@ -95,7 +95,7 @@ namespace IngameScript
                 {
                     Type = SpriteType.TEXT,
                     Alignment = TextAlignment.CENTER,
-                    Data = port.getName(),
+                    Data = port.GetName(),
                     Position = new Vector2(0f, -180f) * scale + centerPos,
                     Color = color,
                     FontId = "Debug",
