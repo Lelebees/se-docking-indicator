@@ -9,7 +9,7 @@ namespace IngameScript
     {
         private readonly IMyShipConnector connector;
         private readonly string dockName;
-
+        private DateTime lastDockTime = DateTime.MinValue;
 
         public DockingPort(IMyShipConnector connector)
         {
@@ -38,6 +38,10 @@ namespace IngameScript
 
         public DockingPortState GetState()
         {
+            if (connector.Status == MyShipConnectorStatus.Connected)
+            {
+                lastDockTime = DateTime.Now;
+            }
             return ConvertConnectorStatusToState(connector.Status);
         }
 
@@ -64,6 +68,11 @@ namespace IngameScript
             }
 
             return connector.OtherConnector.CubeGrid.CustomName;
+        }
+
+        public TimeSpan GetTimeSinceLastDock()
+        {
+            return DateTime.Now.Subtract(lastDockTime);
         }
     }
 }

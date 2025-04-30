@@ -60,6 +60,7 @@ namespace IngameScript
             }
             frame.AddRange(DrawDockingPortName(centerPos, scale, textSurface.ScriptForegroundColor, port));
             frame.AddRange(DrawLeftConnector(centerPos, scale, leftPortColor));
+            frame.AddRange(DrawTimeSinceLastDock(centerPos, scale, port, textSurface.ScriptForegroundColor));
         }
 
         private void RenderDocked(MySpriteDrawFrame frame, Vector2 centerPos, float scale = 1f)
@@ -413,6 +414,34 @@ namespace IngameScript
                     Color = ConnectedGreen,
                     RotationOrScale = 0f
                 } // ChainBarHorizontal CenterLink
+            };
+            return textureSprites;
+        }
+
+        private static List<MySprite> DrawTimeSinceLastDock(Vector2 centerPos, float scale, DockingPort port, Color color)
+        {
+            List<MySprite> textureSprites = new List<MySprite>
+            {
+                new MySprite()
+                {
+                    Type = SpriteType.TEXT,
+                    Alignment = TextAlignment.CENTER,
+                    Data = $"Time of Travel:\n {port.GetTimeSinceLastDock():hh\\:mm\\:ss} ",
+                    Position = new Vector2(0f, 125f) * scale + centerPos,
+                    Color = color,
+                    FontId = "Debug",
+                    RotationOrScale = 2f * scale
+                }, // docktimer
+                new MySprite()
+                {
+                    Type = SpriteType.TEXT,
+                    Alignment = TextAlignment.CENTER,
+                    Data = "Last seen:",
+                    Position = new Vector2(0f, 78f) * scale + centerPos,
+                    Color = color,
+                    FontId = "Debug",
+                    RotationOrScale = 1f * scale
+                } // docktimerIntroduction
             };
             return textureSprites;
         }
