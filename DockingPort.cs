@@ -25,10 +25,10 @@ namespace IngameScript
                 .ToString(this.connector.CustomName);
         }
 
-        public bool isDamagedOrDisabled()
+        public bool IsDamagedOrDisabled()
         {
             // TODO: also check for superficial damage
-            return connector.IsWorking;
+            return !connector.IsWorking;
         }
 
         public string GetName()
@@ -72,7 +72,9 @@ namespace IngameScript
 
         public TimeSpan GetTimeSinceLastDock()
         {
-            return DateTime.Now.Subtract(lastDockTime);
+            if (lastDockTime == DateTime.MinValue)
+                return TimeSpan.MinValue; // Sentinel value
+            return DateTime.Now - lastDockTime;
         }
     }
 }

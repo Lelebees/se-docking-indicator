@@ -4,6 +4,7 @@ using Sandbox.ModAPI.Ingame;
 using VRage.Game.GUI.TextPanel;
 using VRage.Game.ModAPI.Ingame.Utilities;
 using VRageMath;
+using VRageRender.Import;
 
 namespace IngameScript
 {
@@ -51,10 +52,24 @@ namespace IngameScript
             frame.Dispose();
         }
 
+        private static string FormatDockTime(TimeSpan timeSpan)
+        {
+            if (timeSpan.TotalSeconds < 60)
+                return $"{(int)timeSpan.TotalSeconds} sec";
+            else if (timeSpan.TotalMinutes < 10)
+                return $"{(int)timeSpan.TotalMinutes} min {(int)timeSpan.Seconds} sec";
+            else if (timeSpan.TotalMinutes < 60)
+                return $"{(int)timeSpan.TotalMinutes} min";
+            else if (timeSpan.TotalHours < 24)
+                return $"{(int)timeSpan.TotalHours} hr {(int)timeSpan.Minutes} min";
+            else
+                return $"{(int)timeSpan.TotalDays} d {(int)timeSpan.Hours} hr";
+        }
+        
         private void RenderDisconnected(MySpriteDrawFrame frame, Vector2 centerPos, float scale = 1f)
         {
             Color leftPortColor = Color.White;
-            if (port.isDamagedOrDisabled())
+            if (port.IsDamagedOrDisabled())
             {
                 leftPortColor = ErrorRed;
             }
@@ -420,15 +435,27 @@ namespace IngameScript
 
         private static List<MySprite> DrawTimeSinceLastDock(Vector2 centerPos, float scale, DockingPort port, Color color)
         {
+            string dataText;
+            Color textColor;
+            if (port.GetTimeSinceLastDock() == TimeSpan.MinValue)
+            {
+                dataText = "No past dock data";
+                textColor = ErrorRed;
+            }
+            else
+            {
+                dataText = FormatDockTime(port.GetTimeSinceLastDock());
+                textColor = color;
+            }
             List<MySprite> textureSprites = new List<MySprite>
             {
                 new MySprite()
                 {
                     Type = SpriteType.TEXT,
                     Alignment = TextAlignment.CENTER,
-                    Data = $"Time of Travel:\n {port.GetTimeSinceLastDock():hh\\:mm\\:ss} ",
+                    Data = dataText,
                     Position = new Vector2(0f, 125f) * scale + centerPos,
-                    Color = color,
+                    Color = textColor,
                     FontId = "Debug",
                     RotationOrScale = 2f * scale
                 }, // docktimer
@@ -436,7 +463,7 @@ namespace IngameScript
                 {
                     Type = SpriteType.TEXT,
                     Alignment = TextAlignment.CENTER,
-                    Data = "Last seen:",
+                    Data = "Undocked for:\n",
                     Position = new Vector2(0f, 78f) * scale + centerPos,
                     Color = color,
                     FontId = "Debug",
